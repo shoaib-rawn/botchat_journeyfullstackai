@@ -102,10 +102,20 @@ with st.sidebar:
         st.rerun()
 
 for msg in st.session_state.history:
-    with st.chat_message(msg["role"]):
+    with st.chat_message(msg["role"], avatar="🐍" if msg["role"] == "assistant" else None):
         st.markdown(msg["content"])
 
-if prompt := st.chat_input("Ask a Python question..."):
+clicked = None
+if not st.session_state.history:
+    with st.chat_message("assistant", avatar="🐍"):
+        st.markdown("Assalam o Alaikum! I'm **PyBuddy**. Ask me anything about Python, or try one of these:")
+    examples = ["What is a list?", "How do for loops work?", "What does IndexError mean?"]
+    for col, ex in zip(st.columns(len(examples)), examples):
+        if col.button(ex, use_container_width=True):
+            clicked = ex
+
+prompt = st.chat_input("Ask a Python question...") or clicked
+if prompt:
     with st.chat_message("user"):
         st.markdown(prompt)
     if client is None:
@@ -113,5 +123,5 @@ if prompt := st.chat_input("Ask a Python question..."):
     else:
         with st.spinner("Thinking..."):
             reply = ask(st.session_state.history, prompt)
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar="🐍"):
         st.markdown(reply)
